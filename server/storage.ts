@@ -92,7 +92,7 @@ export class MemStorage implements IStorage {
         title: "Assignment Portal Access",
         content: "Hi! I can help you with accessing the assignment portal. Here are the steps:\n1. Go to the student dashboard\n2. Click on 'Assignments' in the menu\n3. Select your course from the dropdown\n\nIf you continue to have issues, please contact technical support.",
         categoryId: techSupportCategory.id,
-        keywords: ["assignment", "portal", "access", "login", "dashboard"],
+        keywords: ["assignment", "portal", "access", "login", "dashboard", "help", "how", "submit"],
         usageCount: 847,
         successRate: 0.94,
         isActive: true,
@@ -132,6 +132,24 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       };
       this.responseTemplates.set(template.id, template);
+    }
+
+    // Add a general greeting template
+    const generalCategory = categoriesArray.find(c => c.name === "General");
+    if (generalCategory) {
+      const greetingTemplate: ResponseTemplate = {
+        id: randomUUID(),
+        title: "General Greeting",
+        content: "Hello! Welcome to our educational support system. I'm here to help you with any questions about:\n\n• Assignment submissions and portal access\n• Grade inquiries and academic records\n• Class schedules and course information\n• Technical support for our systems\n\nHow can I assist you today?",
+        categoryId: generalCategory.id,
+        keywords: ["hello", "hi", "hey", "help", "support", "assist", "question"],
+        usageCount: 156,
+        successRate: 0.96,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.responseTemplates.set(greetingTemplate.id, greetingTemplate);
     }
   }
 

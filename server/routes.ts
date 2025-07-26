@@ -151,7 +151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Try to find automated response
       const templates = await storage.getResponseTemplates();
-      const matchedTemplate = findBestMatchingTemplate(inquiry.message, templates);
+      const activeTemplates = templates.filter(t => t.isActive);
+      const matchedTemplate = findBestMatchingTemplate(inquiry.message, activeTemplates);
       
       if (matchedTemplate) {
         const responseTime = Math.random() * 2 + 0.5; // 0.5-2.5 seconds
@@ -166,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Update template usage
         await storage.updateResponseTemplate(matchedTemplate.id, {
-          usageCount: matchedTemplate.usageCount + 1,
+          usageCount: (matchedTemplate.usageCount || 0) + 1,
         });
 
         res.json(updatedInquiry);
@@ -264,25 +265,35 @@ function findBestMatchingTemplate(message: string, templates: any[]): any | null
   let bestMatch = null;
   let highestScore = 0;
 
-  for (const template of templates.filter(t => t.isActive)) {
+  for (const template of templates) {
     let score = 0;
     
-    // Check keywords
-    for (const keyword of template.keywords) {
-      if (lowercaseMessage.includes(keyword.toLowerCase())) {
-        score += 2;
+    // Check keywords with higher weight
+    if (template.keywords) {
+      for (const keyword of template.keywords) {
+        if (lowercaseMessage.includes(keyword.toLowerCase())) {
+          score += 3;
+        }
       }
     }
     
     // Check title words
     const titleWords = template.title.toLowerCase().split(' ');
     for (const word of titleWords) {
-      if (lowercaseMessage.includes(word)) {
+      if (word.length > 2 && lowercaseMessage.includes(word)) {
+        score += 2;
+      }
+    }
+    
+    // Check for common educational keywords
+    const educationalKeywords = ['help', 'how', 'what', 'where', 'when', 'study', 'class', 'course', 'assignment', 'grade', 'login', 'access', 'portal', 'schedule', 'academic'];
+    for (const keyword of educationalKeywords) {
+      if (lowercaseMessage.includes(keyword)) {
         score += 1;
       }
     }
     
-    if (score > highestScore && score >= 2) {
+    if (score > highestScore && score >= 1) { // Lower threshold for better matching
       highestScore = score;
       bestMatch = template;
     }

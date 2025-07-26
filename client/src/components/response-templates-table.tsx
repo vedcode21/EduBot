@@ -21,7 +21,12 @@ export default function ResponseTemplatesTable() {
   const { toast } = useToast();
 
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
-    queryKey: ["/api/response-templates", { search: searchQuery }],
+    queryKey: ["/api/response-templates", searchQuery],
+    queryFn: async () => {
+      const searchParam = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
+      const response = await fetch(`/api/response-templates${searchParam}`);
+      return response.json();
+    },
   });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
